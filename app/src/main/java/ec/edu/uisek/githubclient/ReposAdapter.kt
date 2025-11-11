@@ -23,7 +23,7 @@ class RepoViewHolder(private val binding: FragmentRepoItemBinding) : RecyclerVie
 class ReposAdapter : RecyclerView.Adapter<RepoViewHolder>() {
 
     // Por ahora, simplemente le diremos que muestre 3 ítems.
-    override fun getItemCount(): Int = 3
+    override fun getItemCount(): Int = 5
 
     // Se llama para crear un nuevo ViewHolder cuando el RecyclerView lo necesita.
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RepoViewHolder {
