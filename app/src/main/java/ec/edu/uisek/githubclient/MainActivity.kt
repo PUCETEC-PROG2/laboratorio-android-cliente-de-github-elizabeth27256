@@ -1,11 +1,18 @@
 package ec.edu.uisek.githubclient
 
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import ec.edu.uisek.githubclient.databinding.ActivityMainBinding
+import ec.edu.uisek.githubclient.models.Repo
+import ec.edu.uisek.githubclient.services.RetrofitClient
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -16,10 +23,51 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupRecyclerView()
+        fetchRepositories()
     }
 
     private fun setupRecyclerView(){
         reposAdapter = ReposAdapter ()
         binding.repoRecyclerView.adapter = reposAdapter
     }
+
+    private fun fetchRepositories() {
+        val apiService = RetrofitClient.gitHubApiService
+        val call = apiService.getRepos()
+
+        call.enqueue(object : Callback<List<Repo>> {
+            override fun onResponse(call: Call<List<Repo>?>, response: Response<List<Repo>?>) {
+                if (response.isSuccessful){
+                    val repos = response.body()
+                    if (repos != null && repos.isNotEmpty()){
+                        reposAdapter.updateRepositories( newRepos = repos)
+                    } else{
+                        //Vacia
+                        showMessage( msg = "Usted no tiene repositorios")
+                    }
+                }else {
+                    //llamada
+                    val errorMsg= when (response.code()){
+                        401 -> "Error de autenticacion"
+                        403 -> "Recurso no permitido"
+                        404 -> "Recurso no encontrado"
+                        else -> "Error  desconocido ${response.code()}"
+                    }
+
+                    Log.e("MainActivy", errorMsg)
+                    showMessage(errorMsg)
+                }
+            }
+
+            override fun onFailure(call: Call<List<Repo>?>, t: Throwable) {
+                showMessage("Error de conexion")
+                Log.e("MainActivy", "Error de conexion ${t.message}")
+            }
+        })
+    }
+
+    private fun showMessage (msg: String){
+        Toast.makeText(this, msg, Toast.LENGTH_LONG)
+    }
 }
+
