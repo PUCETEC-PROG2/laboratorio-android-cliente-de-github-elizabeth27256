@@ -17,4 +17,25 @@
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     tools:listitem="@layout/fragment_repo_item"/>
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        >
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/new_repo_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:backgroundTint="@color/yellow"
+            android:layout_margin="16dp"
+            android:src="@drawable/add_24"
+            app:tint="@color/white"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle.repo"
+            />
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
