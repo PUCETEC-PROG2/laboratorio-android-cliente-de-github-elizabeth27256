@@ -43,7 +43,6 @@ class ReposAdapter(
     private val buttonDeleteRepoClick: (Repo) -> Unit,
 ) : RecyclerView.Adapter<RepoViewHolder>() {
 
-    // hacemos repositories de forma pública pero solo de lectura para MainActivity
     var repositories: List<Repo> = emptyList()
         private set
 

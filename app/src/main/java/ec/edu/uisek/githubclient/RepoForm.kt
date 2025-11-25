@@ -100,8 +100,8 @@ class RepoForm : AppCompatActivity() {
         val repoName = repoformbinding.nameRepoInputForm.text.toString()
 
         val resultIntent = Intent().apply {
-            putExtra("REPO_NAME", repoName)
-            putExtra("UPDATED_DESC", updatedDesc)
+            putExtra("owner", repoName)
+            putExtra("repo", updatedDesc)
         }
         setResult(RESULT_OK, resultIntent)
         finish()

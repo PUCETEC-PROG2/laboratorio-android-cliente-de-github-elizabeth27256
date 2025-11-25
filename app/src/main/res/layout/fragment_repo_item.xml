@@ -10,16 +10,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="16dp"
-        >
+        android:padding="16dp">
 
         <ImageView
             android:id="@+id/repo_owner_image"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="center"
-            android:src="@drawable/ic_launcher_foreground"
-            />
+            android:src="@drawable/ic_launcher_foreground" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -35,16 +33,15 @@
                 <TextView
                     android:layout_width="120dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/repo_name"
-                    android:textStyle="bold"
                     android:padding="8dp"
-                    />
+                    android:text="@string/repo_name"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/repo_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/test_text"/>
+                    android:text="@string/test_text" />
             </LinearLayout>
 
             <LinearLayout
@@ -55,16 +52,15 @@
                 <TextView
                     android:layout_width="120dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/repo_description"
-                    android:textStyle="bold"
                     android:padding="8dp"
-                    />
+                    android:text="@string/repo_description"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/repo_description"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/test_text"/>
+                    android:text="@string/test_text" />
             </LinearLayout>
 
             <LinearLayout
@@ -75,44 +71,43 @@
                 <TextView
                     android:layout_width="120dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/repo_lang"
-                    android:textStyle="bold"
                     android:padding="8dp"
-                    />
+                    android:text="@string/repo_lang"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/repo_lang"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/test_text"/>
+                    android:text="@string/test_text" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:orientation="horizontal"
                 android:gravity="center_vertical"
+                android:orientation="horizontal"
                 android:paddingEnd="8dp">
 
                 <ImageButton
                     android:id="@+id/buttonEditRepo"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:src="@drawable/edit_24"
-                    app:tint="@color/blue_edit"
-                    android:contentDescription="Editar"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:padding="8dp"/>
+                    android:contentDescription="Editar"
+                    android:padding="8dp"
+                    android:src="@drawable/edit_24"
+                    app:tint="@color/blue_edit" />
 
                 <ImageButton
                     android:id="@+id/buttonDeleteRepo"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:src="@drawable/delete_24"
-                    app:tint="@color/red_delete"
-                    android:contentDescription="Eliminar"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:padding="8dp"/>
+                    android:contentDescription="Eliminar"
+                    android:padding="8dp"
+                    android:src="@drawable/delete_24"
+                    app:tint="@color/red_delete" />
             </LinearLayout>
 
         </LinearLayout>

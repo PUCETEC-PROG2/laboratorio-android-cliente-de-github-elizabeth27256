@@ -22,16 +22,16 @@ interface GitHubApiService {
     @POST("/user/repos")
     fun createRepo(@Body repoRequest: RepoRequest): Call<Repo>
 
-    @PATCH("/repos/{username}/{repo}")
+    @PATCH("/repos/{owner}/{repo}")
     fun editRepo(
-        @Path("username") username: String,
+        @Path("owner") username: String,
         @Path("repo") repoName: String,
         @Body repoRequest: RepoRequest
     ): Call<Repo>
 
-    @DELETE("/repos/{username}/{repo}")
+    @DELETE("/repos/{owner}/{repo}")
     fun deleteRepo(
-        @Path("username") username: String,
+        @Path("owner") username: String,
         @Path("repo") repoName: String
     ): Call<Void>
 }

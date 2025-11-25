@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var reposAdapter: ReposAdapter
 
-    private val EDIT_REPO_REQUEST = 100 // Código de solicitud para edición
+    private val EDIT_REPO_REQUEST = 100
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,11 +25,15 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupRecyclerView()
-        fetchRepositories()
 
         binding.newRepoFab.setOnClickListener {
             displayNewRepoForm()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        fetchRepositories()
     }
 
     private fun setupRecyclerView() {
@@ -86,7 +90,6 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    // Abrir RepoForm para editar un repositorio existente
     private fun abrirFormularioParaEditar(repo: Repo) {
         val intent = Intent(this, RepoForm::class.java).apply {
             putExtra("MODE", "EDIT")
@@ -97,7 +100,6 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(intent, EDIT_REPO_REQUEST)
     }
 
-    // Eliminamos el repositorio de la lista
     private fun eliminarRepositorio(repo: Repo) {
         val updatedList = reposAdapter.repositories.toMutableList()
         updatedList.remove(repo)
