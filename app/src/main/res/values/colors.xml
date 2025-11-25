@@ -3,4 +3,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="yellow">#CDDC39</color>
+    <color name="blue_edit">#2196F3</color>  <!-- azul -->
+    <color name="red_delete">#F44336</color> <!-- rojo -->
+
 </resources>
