@@ -2,8 +2,8 @@ package ec.edu.uisek.githubclient
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import ec.edu.uisek.githubclient.databinding.ActivityMainBinding
 import ec.edu.uisek.githubclient.models.Repo
@@ -16,8 +16,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var reposAdapter: ReposAdapter
-
-    private val EDIT_REPO_REQUEST = 100
+    private val owner = "elizabeth27256"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,92 +41,78 @@ class MainActivity : AppCompatActivity() {
                 abrirFormularioParaEditar(repo)
             },
             buttonDeleteRepoClick = { repo ->
-                eliminarRepositorio(repo)
+                showDeleteConfirmationDialog(repo)
             }
         )
         binding.repoRecyclerView.adapter = reposAdapter
     }
 
     private fun fetchRepositories() {
-        val apiService = RetrofitClient.gitHubApiService
-        val call = apiService.getRepos()
-
-        call.enqueue(object : Callback<List<Repo>> {
-            override fun onResponse(call: Call<List<Repo>?>, response: Response<List<Repo>?>) {
-                if (response.isSuccessful) {
-                    val repos = response.body()
-                    if (!repos.isNullOrEmpty()) {
-                        reposAdapter.updateRepositories(repos)
+        RetrofitClient.gitHubApiService.getRepos()
+            .enqueue(object : Callback<List<Repo>> {
+                override fun onResponse(call: Call<List<Repo>>, response: Response<List<Repo>>) {
+                    if (response.isSuccessful) {
+                        reposAdapter.updateRepositories(response.body() ?: emptyList())
                     } else {
-                        showMessage("Usted no tiene repositorios")
+                        showMessage("Error al cargar repositorios: ${response.code()}")
                     }
-                } else {
-                    val errorMsg = when (response.code()) {
-                        401 -> "Error de autenticación"
-                        403 -> "Recurso no permitido"
-                        404 -> "Recurso no encontrado"
-                        else -> "Error desconocido ${response.code()}"
-                    }
-                    Log.e("MainActivity", errorMsg)
-                    showMessage(errorMsg)
                 }
-            }
 
-            override fun onFailure(call: Call<List<Repo>?>, t: Throwable) {
-                showMessage("Error de conexión")
-                Log.e("MainActivity", "Error de conexión: ${t.message}")
-            }
-        })
-    }
-
-    private fun showMessage(msg: String) {
-        Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
-    }
-
-    private fun displayNewRepoForm() {
-        val intent = Intent(this, RepoForm::class.java)
-        intent.putExtra("MODE", "CREATE") // marcamos como creación
-        startActivity(intent)
+                override fun onFailure(call: Call<List<Repo>>, t: Throwable) {
+                    showMessage("Error de conexión: ${t.message}")
+                }
+            })
     }
 
     private fun abrirFormularioParaEditar(repo: Repo) {
         val intent = Intent(this, RepoForm::class.java).apply {
             putExtra("MODE", "EDIT")
             putExtra("REPO_NAME", repo.name)
-            putExtra("REPO_DESC", repo.description)
-            putExtra("REPO_LANG", repo.language)
+            putExtra("REPO_DESC", repo.description ?: "")
         }
-        startActivityForResult(intent, EDIT_REPO_REQUEST)
+        startActivity(intent)
+    }
+
+    private fun showDeleteConfirmationDialog(repo: Repo) {
+        AlertDialog.Builder(this)
+            .setTitle("Eliminar repositorio")
+            .setMessage("¿Estás seguro que quieres eliminar el repositorio \"${repo.name}\"?")
+            .setPositiveButton("Sí") { _, _ ->
+                eliminarRepositorio(repo)
+            }
+            .setNegativeButton("Cancelar") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+            .show()
     }
 
     private fun eliminarRepositorio(repo: Repo) {
-        val updatedList = reposAdapter.repositories.toMutableList()
-        updatedList.remove(repo)
-        reposAdapter.updateRepositories(updatedList)
-        showMessage("Repositorio eliminado")
+        RetrofitClient.gitHubApiService.deleteRepo(owner, repo.name)
+            .enqueue(object : Callback<Void> {
+                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                    if (response.isSuccessful) {
+                        showMessage("Repositorio eliminado correctamente")
+                        fetchRepositories()
+                    } else {
+                        showMessage("Error al eliminar: ${response.code()}")
+                    }
+                }
+
+                override fun onFailure(call: Call<Void>, t: Throwable) {
+                    showMessage("Error: ${t.message}")
+                }
+            })
     }
 
-    //Recibimos los resultado de edición y actualizar RecyclerView
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+    private fun displayNewRepoForm() {
+        val intent = Intent(this, RepoForm::class.java)
+        intent.putExtra("MODE", "CREATE")
+        startActivity(intent)
+    }
 
-        if (requestCode == EDIT_REPO_REQUEST && resultCode == RESULT_OK && data != null) {
-            val updatedDesc = data.getStringExtra("UPDATED_DESC") ?: return
-            val updatedName = data.getStringExtra("REPO_NAME") ?: return
-
-            val updatedList = reposAdapter.repositories.toMutableList()
-            val index = updatedList.indexOfFirst { it.name == updatedName }
-            if (index != -1) {
-                val repo = updatedList[index]
-                val updatedRepo = repo.copy(description = updatedDesc)
-                updatedList[index] = updatedRepo
-                reposAdapter.updateRepositories(updatedList)
-                showMessage("Repositorio actualizado")
-            }
-        }
+    private fun showMessage(msg: String) {
+        Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
     }
 }
-
-
-
 

@@ -16,23 +16,25 @@ interface GitHubApiService {
     @GET("/user/repos")
     fun getRepos(
         @Query("sort") sort: String = "created",
-        @Query("direction") direction: String = "desc"
+        @Query("direction") direction: String = "desc",
     ): Call<List<Repo>>
 
     @POST("/user/repos")
-    fun createRepo(@Body repoRequest: RepoRequest): Call<Repo>
-
-    @PATCH("/repos/{owner}/{repo}")
-    fun editRepo(
-        @Path("owner") username: String,
-        @Path("repo") repoName: String,
+    fun createRepo(
         @Body repoRequest: RepoRequest
     ): Call<Repo>
 
-    @DELETE("/repos/{owner}/{repo}")
+    @PATCH("repos/{owner}/{repo}")
+    fun updateRepo(
+        @Path("owner") owner: String,
+        @Path("repo") repo: String,
+        @Body repoRequest: RepoRequest
+    ): Call<Repo>
+
+    @DELETE("repos/{owner}/{repo}")
     fun deleteRepo(
-        @Path("owner") username: String,
-        @Path("repo") repoName: String
+        @Path("owner") owner: String,
+        @Path("repo") repo: String,
     ): Call<Void>
 }
 

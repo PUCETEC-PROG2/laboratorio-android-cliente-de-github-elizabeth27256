@@ -8,6 +8,6 @@ data class Repo(
     val owner: RepoOwner
 )
 data class RepoRequest(
-    val name: String,
-    val description: String?
+    val name: String? = null,
+    val description: String? = null
 )

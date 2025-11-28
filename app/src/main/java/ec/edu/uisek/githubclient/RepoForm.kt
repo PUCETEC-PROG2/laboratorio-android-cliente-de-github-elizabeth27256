@@ -1,9 +1,8 @@
 package ec.edu.uisek.githubclient
 
-import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import ec.edu.uisek.githubclient.databinding.ActivityRepoFormBinding
 import ec.edu.uisek.githubclient.models.Repo
@@ -15,100 +14,119 @@ import retrofit2.Response
 
 class RepoForm : AppCompatActivity() {
 
-    private lateinit var repoformbinding: ActivityRepoFormBinding
-    private var mode: String = "CREATE" //El modo de crear repo
+    private lateinit var binding: ActivityRepoFormBinding
+    private var mode: String = "CREATE"
+    private var repoName: String = ""
+    private var owner: String = "elizabeth27256" //
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        repoformbinding = ActivityRepoFormBinding.inflate(layoutInflater)
-        setContentView(repoformbinding.root)
+        binding = ActivityRepoFormBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        // aqui lo que hacemos es detectar el modo desde el Intent
+        // vamos a detectar el modo crear o editar
         mode = intent.getStringExtra("MODE") ?: "CREATE"
+        repoName = intent.getStringExtra("REPO_NAME") ?: ""
 
         if (mode == "EDIT") {
-            val repoName = intent.getStringExtra("REPO_NAME") ?: ""
             val repoDesc = intent.getStringExtra("REPO_DESC") ?: ""
-            val repoLang = intent.getStringExtra("REPO_LANG") ?: ""
 
-            repoformbinding.nameRepoInputForm.setText(repoName)
-            repoformbinding.nameRepoInputForm.isEnabled = false // aqui no va a permitir cambiar nombre del repo
-            repoformbinding.descriptionRepoInputForm.setText(repoDesc)
-            repoformbinding.buttonSaveRepo.text = "Actualizar"
+            binding.nameRepoInputForm.setText(repoName)
+            binding.nameRepoInputForm.isEnabled = false
+            binding.descriptionRepoInputForm.setText(repoDesc)
 
-            repoformbinding.buttonSaveRepo.setOnClickListener { updateRepo() }
+            binding.buttonSaveRepo.text = "Actualizar"
+            binding.buttonCancelRepo.text = "Eliminar"
+
+            binding.buttonSaveRepo.setOnClickListener { updateRepo() }
+            binding.buttonCancelRepo.setOnClickListener { showDeleteConfirmationDialog() }
 
         } else {
-            repoformbinding.buttonSaveRepo.setOnClickListener { createRepoForm() }
-        }
+            binding.buttonSaveRepo.text = "Guardar"
+            binding.buttonCancelRepo.text = "Cancelar"
 
-        repoformbinding.buttonCancelRepo.setOnClickListener { finish() }
+            binding.buttonSaveRepo.setOnClickListener { createRepo() }
+            binding.buttonCancelRepo.setOnClickListener { finish() }
+        }
     }
 
-    private fun validateInput(): Boolean {
-        val reponame = repoformbinding.nameRepoInputForm.text.toString()
-        if (reponame.isBlank()) {
-            repoformbinding.nameRepoInputForm.error = "El nombre del repositorio es obligatorio"
-            return false
-        }
-        if (reponame.contains(" ")) {
-            repoformbinding.nameRepoInputForm.error =
-                "El nombre del repositorio no puede contener espacios"
-            return false
-        }
-        return true
-    }
+    private fun createRepo() {
+        val name = binding.nameRepoInputForm.text.toString()
+        val desc = binding.descriptionRepoInputForm.text.toString()
 
-    private fun createRepoForm() {
-        if (!validateInput()) return
-
-        val reponame = repoformbinding.nameRepoInputForm.text.toString()
-        val repodescription = repoformbinding.descriptionRepoInputForm.text.toString()
-        val repoRequest = RepoRequest(name = reponame, description = repodescription)
-
-        val apiServices = RetrofitClient.gitHubApiService
-        val call = apiServices.createRepo(repoRequest)
-
-        call.enqueue(object : Callback<Repo> {
-            override fun onResponse(call: Call<Repo>, response: Response<Repo>) {
-                if (response.isSuccessful) {
-                    Log.d("RepoForm", "El repositorio $reponame fue creado exitosamente")
-                    showMessage("El repositorio $reponame fue creado exitosamente")
-                    finish()
-                } else {
-                    val errorMessage = when (response.code()) {
-                        401 -> "Error de autenticacion"
-                        403 -> "Recurso no permitido"
-                        404 -> "Recurso no encontrado"
-                        else -> "Error desconocido ${response.code()}: ${response.message()}"
-                    }
-                    Log.e("RepoForm", errorMessage)
-                    showMessage(errorMessage)
+        val repoRequest = RepoRequest(name = name, description = desc)
+        RetrofitClient.gitHubApiService.createRepo(repoRequest)
+            .enqueue(object : Callback<Repo> {
+                override fun onResponse(call: Call<Repo>, response: Response<Repo>) {
+                    if (response.isSuccessful) {
+                        showMessage("Repositorio creado en GitHub")
+                        finish()
+                    } else showMessage("Error al crear: ${response.code()}")
                 }
-            }
 
-            override fun onFailure(call: Call<Repo>, t: Throwable) {
-                Log.e("RepoForm", "Error de red: ${t.message}")
-                showMessage("Error de red: ${t.message}")
-            }
-        })
+                override fun onFailure(call: Call<Repo>, t: Throwable) {
+                    showMessage("Error: ${t.message}")
+                }
+            })
     }
 
-    // vamos a actualizarl la informacion del repo
     private fun updateRepo() {
-        val updatedDesc = repoformbinding.descriptionRepoInputForm.text.toString()
-        val repoName = repoformbinding.nameRepoInputForm.text.toString()
+        val desc = binding.descriptionRepoInputForm.text.toString()
 
-        val resultIntent = Intent().apply {
-            putExtra("owner", repoName)
-            putExtra("repo", updatedDesc)
-        }
-        setResult(RESULT_OK, resultIntent)
-        finish()
+        val repoRequest = RepoRequest(name = repoName, description = desc)
+
+        RetrofitClient.gitHubApiService.updateRepo(owner, repoName, repoRequest)
+            .enqueue(object : Callback<Repo> {
+                override fun onResponse(call: Call<Repo>, response: Response<Repo>) {
+                    if (response.isSuccessful) {
+                        showMessage("Repositorio actualizado en GitHub")
+                        finish()
+                    } else {
+                        showMessage("Error al actualizar: ${response.code()}")
+                    }
+                }
+
+                override fun onFailure(call: Call<Repo>, t: Throwable) {
+                    showMessage("Error: ${t.message}")
+                }
+            })
+    }
+
+    private fun showDeleteConfirmationDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Eliminar repositorio")
+            .setMessage("¿Estás seguro que quieres eliminar el repositorio \"$repoName\"?")
+            .setPositiveButton("Sí") { _, _ ->
+                deleteRepo()
+            }
+            .setNegativeButton("Cancelar") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+            .show()
+    }
+
+    private fun deleteRepo() {
+        RetrofitClient.gitHubApiService.deleteRepo(owner, repoName)
+            .enqueue(object : Callback<Void> {
+                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                    if (response.isSuccessful) {
+                        showMessage("Repositorio eliminado de GitHub")
+                        finish()
+                    } else {
+                        showMessage("Error al eliminar: ${response.code()}")
+                    }
+                }
+
+                override fun onFailure(call: Call<Void>, t: Throwable) {
+                    showMessage("Error: ${t.message}")
+                }
+            })
     }
 
     private fun showMessage(msg: String) {
         Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
     }
 }
+
 
